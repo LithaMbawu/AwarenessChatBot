@@ -1,65 +1,96 @@
-# CyberAwareBot
+# Cybersecurity Awareness Chatbot
 
-## Overview
-
-CyberAwareBot is a console based cybersecurity awareness chatbot built in C#. It combines a voice greeting, ASCII art header, personalized user interaction, and an engaging console UI to help users learn about password safety, phishing, and safe browsing.
+A polished WPF chatbot designed to teach cybersecurity best practices through a natural conversational experience.
 
 ## Features
 
-- Voice greeting plays when the application starts
-- ASCII art logo and stylized console interface
-- Personalized welcome prompt using the user's name
-- Menu-driven learning sections for password safety, phishing, and safe browsing
-- Interactive chatbot mode with cybersecurity answers and follow-up guidance
-- Graceful handling of invalid or empty input
-- Audio playback via `greeting.wav`
-- Clear code structure with separate classes for UI, audio, and chatbot logic
+- **Engaging chat flow** with varied, natural responses
+- **Voice greeting** via text-to-speech on startup
+- **ASCII art header** for a professional cyber style
+- **Keyword-based advice** on passwords, phishing, malware, updates, VPNs, backups, and more
+- **Sentiment-aware responses** that adapt tone to user mood
+- **Conversation memory** for recall and context-aware follow-ups
+- **Personalization** with name recognition and dynamic replies
+- **Clean dark UI** with modern layout and readable styling
+
+## Sample Interaction
+
+- User: "How do I create a strong password?"
+- Bot: "Strong passwords are your first line of defense. Use a mix of letters, numbers, and symbols, and change them regularly. Keep up the good security habits."
+
+- User: "My name is Alex"
+- Bot: "Nice to meet you, Alex! I’ll remember your name so our conversation feels more personal."
+
+- User: "Can you recall what we discussed?"
+- Bot: "So far we’ve talked about passwords. What would you like to focus on next?"
+
+## Installation and Setup
+
+### Prerequisites
+- Windows 10 or later
+- .NET 8.0 SDK installed
+- A Windows-compatible environment for WPF apps
+
+### Build Steps
+1. Open the `CyberAwareBot` project folder.
+2. Run `dotnet build`.
+3. Run `dotnet run`.
+
+### Running the App
+1. Launch the application.
+2. Listen for the voice greeting.
+3. Type a cybersecurity question in the input box.
+4. Press Enter or click **Send**.
+5. Read the chatbot's answer in the history pane.
+
+## How to Use
+
+- Ask about **password safety**, **phishing**, **malware**, **software updates**, **VPN use**, and **backups**.
+- Use phrases like **"my name is"** or **"call me"** to enable the chatbot to remember your name.
+- Ask **"what did we talk about"** or **"remember"** to trigger conversation recall.
+- Try **friendly greetings** and **thank-you phrases** to see varied response styles.
 
 ## Project Structure
 
-- `Program.cs` - application entry point, menu, startup flow, and question sections
-- `UIHelper.cs` - ASCII art display and welcome screens
-- `Chatbot.cs` - interactive chatbot session with personalized responses
-- `AudioPlayer.cs` - voice greeting playback logic
-- `greeting.wav` - recorded welcome audio file
+```
+CyberAwareBot/
+├── .gitignore             # Ignore build and system files
+├── ChatBot.cs             # Core conversation engine
+├── CyberAwareBot.csproj   # Project configuration
+├── KeywordResponder.cs    # Keyword-based response library
+├── MainWindow.xaml        # WPF UI layout
+├── MainWindow.xaml.cs     # UI interaction logic
+├── MemoryStore.cs         # Session memory and preference storage
+├── README.md              # Project documentation
+├── SentimentDetector.cs   # Mood detection and response tone
+└── bin/ obj/              # Build outputs (ignored)
+```
 
-## Usage
+## Architecture
 
-- The application plays a voice greeting on launch.
-- Enter your name when prompted.
-- Choose a menu option:
-  - `1` Password Safety
-  - `2` Phishing
-  - `3` Safe Browsing
-  - `4` Chat with Bot
-  - `5` Play Greeting
-  - `6` Exit
-- In chatbot mode, ask questions about cybersecurity or type `play` to hear the greeting again.
+- **ChatBot.cs**: Orchestrates input evaluation, sentiment handling, memory recall, and response generation
+- **KeywordResponder.cs**: Supplies varied responses for cybersecurity topics
+- **SentimentDetector.cs**: Identifies user mood and adjusts language tone
+- **MemoryStore.cs**: Preserves recent chat history and user preferences
+- **MainWindow.xaml / MainWindow.xaml.cs**: Presents the UI and handles user interaction
+
+## GitHub and ARC Submission
+
+GitHub Repository: https://github.com/LithaMbawu/CyberAbot
+
+If submitting to ARC, include the above GitHub link and your YouTube demo link in the ARC submission form.
+
+## Video Demo
+
+YouTube Video Demo: https://youtube.com/watch?v=demo-link
+
+> Replace the video link above with your actual presentation URL when available.
 
 ## Notes
 
-- The audio playback currently uses `afplay`, which works on macOS.
-- `greeting.wav` is included in the project output so playback works at runtime.
+- The project is configured to target Windows using `EnableWindowsTargeting` for cross-platform build tooling on macOS.
+- This app is intended as an educational cybersecurity awareness tool.
 
-## Improvements
+## License
 
-Potential enhancements include:
-
-- More advanced natural language conversation handling
-- Cross-platform audio playback support
-- Additional cybersecurity topics and interactive lessons
-- Logging of session activity and user progress
-
-## Student Information
-
-- Name: Litha Mbawu
-- Module: Programming 2
-- Student Number: ST10486617
-
-## Actions Taken
-
-- Added audio playback logic for `greeting.wav` and path handling for macOS
-- Implemented interactive quiz feedback so users receive the correct answer after each response
-- Fixed project configuration so the build no longer fails when the audio file is stored outside the project folder
-- Updated the app structure to support topic questions and answer lookups
-
+Educational project - feel free to use and modify for learning and demonstration purposes.
