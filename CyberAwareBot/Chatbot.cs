@@ -1,102 +1,179 @@
-﻿using System;
-using System.Threading;
+using System;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
-namespace CyberAwareBot
+namespace CybersecurityChatbot
 {
-    public class Chatbot
+    /// <summary>
+    /// Main chatbot class that orchestrates conversation flow with memory, sentiment, and keyword responses.
+    /// </summary>
+    public class ChatBot
     {
-        private readonly string userName;
+        private MemoryStore memory;
+        private SentimentDetector sentimentDetector;
+        private KeywordResponder keywordResponder;
 
-        public Chatbot(string name)
+        public ChatBot()
         {
-            userName = string.IsNullOrWhiteSpace(name) ? "Guest" : name.Trim();
+            memory = new MemoryStore();
+            sentimentDetector = new SentimentDetector();
+            keywordResponder = new KeywordResponder();
         }
 
-        public void RunChat()
+        /// <summary>
+        /// Gets the initial greeting message.
+        /// </summary>
+        /// <returns>Greeting string.</returns>
+        public string GetGreeting()
         {
-            AudioPlayer audioPlayer = new AudioPlayer();
+            string? name = memory.GetPreference("name");
+            string greeting = string.IsNullOrWhiteSpace(name)
+                ? "Hello! I'm your Cybersecurity Awareness Chatbot. I'm here to help you learn about staying safe online. What would you like to know?"
+                : $"Hello {name}! I'm your Cybersecurity Awareness Chatbot. I'm ready to help you stay secure today. What would you like to know?";
 
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("\n===========================================");
-            Console.WriteLine($"    CYBER BOT CHAT SESSION - {userName.ToUpper()}");
-            Console.WriteLine("===========================================");
-            Console.ResetColor();
+            memory.AddToHistory("Bot: " + greeting);
+            return greeting;
+        }
 
-            TypeText($"Hi {userName}, I'm here to answer your cybersecurity questions.\n", ConsoleColor.Green);
-            TypeText("You can ask about passwords, phishing, browser safety, or say 'play' to hear the greeting again.\n", ConsoleColor.DarkCyan);
-            TypeText("Type 'exit' to return to the main menu.\n\n", ConsoleColor.Green);
+        /// <summary>
+        /// Processes user input and generates a response.
+        /// </summary>
+        /// <param name="input">User's message.</param>
+        /// <returns>Bot's response.</returns>
+        public string ProcessInput(string input)
+        {
+            memory.AddToHistory("User: " + input);
 
-            string input;
+            string sentiment = sentimentDetector.AnalyzeSentiment(input);
+            string response = GenerateResponse(input, sentiment);
 
-            while ((input = (Console.ReadLine() ?? string.Empty).Trim().ToLower()) != "exit")
+            memory.AddToHistory("Bot: " + response);
+            return response;
+        }
+
+        /// <summary>
+        /// Generates a response based on input and sentiment.
+        /// </summary>
+        /// <param name="input">User input.</param>
+        /// <param name="sentiment">Detected sentiment.</param>
+        /// <returns>Generated response.</returns>
+        private string GenerateResponse(string input, string sentiment)
+        {
+            string lowerInput = input.ToLowerInvariant();
+            string userName = memory.GetPreference("name") ?? string.Empty;
+            string response;
+
+            if (TryStoreUserName(input, out string extractedName))
             {
-                if (string.IsNullOrWhiteSpace(input))
-                {
-                    Respond("I didn't quite understand that. Could you rephrase?", ConsoleColor.Red);
-                }
-                else if (input.Contains("how are you"))
-                {
-                    Respond("I'm operating smoothly and ready to help you stay secure.", ConsoleColor.Green);
-                }
-                else if (input.Contains("your purpose") || input.Contains("what do you do"))
-                {
-                    Respond("My purpose is to guide you through cybersecurity best practices and keep you aware of online risks.", ConsoleColor.Green);
-                }
-                else if (input.Contains("what can i ask") || input.Contains("what can i say"))
-                {
-                    Respond("Ask me about passwords, phishing, safe browsing, multi-factor authentication, and general online safety.", ConsoleColor.Green);
-                }
-                else if (input.Contains("password"))
-                {
-                    Respond("Strong passwords should be unique, long, and include letters, numbers, and symbols. Avoid reuse.", ConsoleColor.Cyan);
-                }
-                else if (input.Contains("phishing"))
-                {
-                    Respond("Phishing is when attackers trick you via email, messages, or sites. Always verify the sender and never click suspicious links.", ConsoleColor.Cyan);
-                }
-                else if (input.Contains("safe browsing") || input.Contains("browser") || input.Contains("https"))
-                {
-                    Respond("Use HTTPS sites, keep your browser updated, and avoid unknown downloads or suspicious pop-ups.", ConsoleColor.Cyan);
-                }
-                else if (input.Contains("two-factor") || input.Contains("2fa") || input.Contains("multi-factor"))
-                {
-                    Respond("Two-factor authentication adds a second layer of security, which makes it much harder for attackers to access your account.", ConsoleColor.Cyan);
-                }
-                else if (input.Contains("play"))
-                {
-                    TypeText("Playing the voice greeting again for you...\n", ConsoleColor.Magenta);
-                    audioPlayer.PlayGreeting();
-                }
-                else if (input.Contains("thank"))
-                {
-                    Respond("You're welcome! If you have more questions, I'm here to help.", ConsoleColor.Green);
-                }
-                else
-                {
-                    Respond("That is a great question. Try asking about passwords, phishing, or safe browsing.", ConsoleColor.Red);
-                }
+                response = $"Nice to meet you, {extractedName}! I’ll remember your name so our conversation feels more personal. ";
+            }
+            else if (lowerInput.Contains("remember") || lowerInput.Contains("recall") || lowerInput.Contains("history") || lowerInput.Contains("previous"))
+            {
+                response = GetMemoryRecallResponse();
+            }
+            else if (keywordResponder.HasResponse("password") && lowerInput.Contains("password"))
+            {
+                response = keywordResponder.GetResponse("password");
+            }
+            else if (keywordResponder.HasResponse("phishing") && lowerInput.Contains("phishing"))
+            {
+                response = keywordResponder.GetResponse("phishing");
+            }
+            else if (keywordResponder.HasResponse("malware") && (lowerInput.Contains("malware") || lowerInput.Contains("virus")))
+            {
+                response = keywordResponder.GetResponse("malware");
+            }
+            else if (keywordResponder.HasResponse("vpn") && lowerInput.Contains("vpn"))
+            {
+                response = keywordResponder.GetResponse("vpn");
+            }
+            else if (keywordResponder.HasResponse("backup") && lowerInput.Contains("backup"))
+            {
+                response = keywordResponder.GetResponse("backup");
+            }
+            else if (keywordResponder.HasResponse("update") && lowerInput.Contains("update"))
+            {
+                response = keywordResponder.GetResponse("update");
+            }
+            else if (lowerInput.Contains("hello") || lowerInput.Contains("hi") || lowerInput.Contains("hey"))
+            {
+                response = keywordResponder.GetResponse("hello");
+            }
+            else if (lowerInput.Contains("thank"))
+            {
+                response = keywordResponder.GetResponse("thanks");
+            }
+            else if (lowerInput.Contains("how are you") || lowerInput.Contains("how are u") || lowerInput.Contains("how r u"))
+            {
+                response = keywordResponder.GetResponse("howareyou");
+            }
+            else
+            {
+                response = keywordResponder.GetResponse("fallback");
             }
 
-            Console.WriteLine();
+            return BuildNaturalResponse(response, sentiment, userName);
         }
 
-        private void Respond(string message, ConsoleColor color)
+        /// <summary>
+        /// Adds a friendly sentiment-aware layer to the chatbot response.
+        /// </summary>
+        /// <param name="response">The base response text.</param>
+        /// <param name="sentiment">Detected sentiment.</param>
+        /// <param name="userName">User's name if known.</param>
+        /// <returns>Final response string.</returns>
+        private string BuildNaturalResponse(string response, string sentiment, string userName)
         {
-            Console.ForegroundColor = color;
-            Console.WriteLine($"Bot: {message}");
-            Console.ResetColor();
+            string prefix = sentimentDetector.GetSentimentPrefix(sentiment);
+            string suffix = sentimentDetector.GetSentimentModifier(sentiment);
+            string namePrefix = string.IsNullOrWhiteSpace(userName) ? string.Empty : $"{userName}, ";
+
+            return string.Concat(namePrefix, prefix, response, suffix);
         }
 
-        private void TypeText(string text, ConsoleColor color)
+        /// <summary>
+        /// Stores the user's name if it is present in the input.
+        /// </summary>
+        /// <param name="input">User input text.</param>
+        /// <param name="name">Extracted user name.</param>
+        /// <returns>True if a name was extracted and stored.</returns>
+        private bool TryStoreUserName(string input, out string name)
         {
-            Console.ForegroundColor = color;
-            foreach (char character in text)
+            name = string.Empty;
+            var match = Regex.Match(input, "\\b(?:my name is|call me|i am|im)\\s+([A-Za-z][A-Za-z0-9_-]{1,19})", RegexOptions.IgnoreCase);
+            if (!match.Success)
+                return false;
+
+            name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(match.Groups[1].Value.ToLower());
+            memory.SetPreference("name", name);
+            memory.AddToHistory($"Bot: Stored user name as {name}.");
+            return true;
+        }
+
+        /// <summary>
+        /// Generates a response that recalls recent conversation topics.
+        /// </summary>
+        /// <returns>A memory-aware response.</returns>
+        private string GetMemoryRecallResponse()
+        {
+            var topics = memory.GetRecentTopics(4);
+            if (topics.Count == 0)
             {
-                Console.Write(character);
-                Thread.Sleep(12);
+                return "We are just getting started. Tell me what cybersecurity topic you'd like to explore first.";
             }
-            Console.ResetColor();
+
+            string topicList = string.Join(", ", topics);
+            return $"So far we’ve talked about {topicList}. What would you like to focus on next?";
+        }
+
+        /// <summary>
+        /// Retrieves recent conversation history.
+        /// </summary>
+        /// <returns>Formatted history string.</returns>
+        public string GetConversationHistory()
+        {
+            var history = memory.GetRecentHistory();
+            return string.Join("\n", history);
         }
     }
 }
-
