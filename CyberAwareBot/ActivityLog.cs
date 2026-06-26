@@ -21,7 +21,23 @@ namespace CybersecurityChatbot
 
         public IReadOnlyList<string> GetRecentEntries(int count)
         {
-            return _entries.Take(count).ToList();
+            return GetRecentEntries(count, 0);
+        }
+
+        public IReadOnlyList<string> GetRecentEntries(int count, int offset)
+        {
+            if (count <= 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            int startIndex = Math.Max(0, offset);
+            if (startIndex >= _entries.Count)
+            {
+                return Array.Empty<string>();
+            }
+
+            return _entries.Skip(startIndex).Take(count).ToList();
         }
     }
 }

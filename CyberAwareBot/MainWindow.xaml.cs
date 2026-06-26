@@ -20,6 +20,7 @@ namespace CybersecurityChatbot
         private readonly ActivityLog _activityLog;
         private readonly QuizEngine _quizEngine;
         private readonly AudioPlayer _audioPlayer;
+        private int _activityLogOffset;
 
         public MainWindow()
         {
@@ -413,7 +414,7 @@ namespace CybersecurityChatbot
         private void RefreshActivityLog()
         {
             ActivityLogListBox.ItemsSource = null;
-            ActivityLogListBox.ItemsSource = _activityLog.GetRecentEntries(10).ToList();
+            ActivityLogListBox.ItemsSource = _activityLog.GetRecentEntries(10, _activityLogOffset).ToList();
         }
 
         private void LoadQuizQuestionPreview()
@@ -656,9 +657,17 @@ namespace CybersecurityChatbot
 
         private void RefreshLogButton_Click(object sender, RoutedEventArgs e)
         {
+            _activityLogOffset = 0;
             RefreshActivityLog();
             AppendBotMessage(BuildActivitySummary());
         }
+
+        private void ShowMoreLogButton_Click(object sender, RoutedEventArgs e)
+        {
+            _activityLogOffset += 10;
+            RefreshActivityLog();
+        }
+
         private void AppendUserMessage(string message)
         {
             ChatHistoryTextBlock.Text += $"You: {message}\n\n";

@@ -193,7 +193,10 @@
                 <TextBlock Text="Activity Log" Classes="section-title"/>
                 <TextBlock Text="Recent actions from tasks, reminders, quiz attempts, and chatbot commands." Foreground="#CBD5E1" Margin="0,6,0,0" TextWrapping="Wrap"/>
               </StackPanel>
-              <Button Grid.Column="1" x:Name="RefreshLogButton" Content="Refresh Log" Classes="button" Click="RefreshLogButton_Click"/>
+              <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button x:Name="RefreshLogButton" Content="Refresh Log" Classes="button" Click="RefreshLogButton_Click"/>
+                <Button x:Name="ShowMoreLogButton" Content="Show More" Classes="button" Click="ShowMoreLogButton_Click"/>
+              </StackPanel>
             </Grid>
           </Border>
           <Border Grid.Row="1" Classes="panel">
