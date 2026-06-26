@@ -100,9 +100,6 @@ GitHub repository: https://github.com/LithaMbawu/AwarenessChatBot.git
 If you are submitting to ARC, include the GitHub link and your video demo link in the submission form.
 
 ## Demo video
-
-Please update the YouTube demo link below with your latest video before sharing the project publicly.
-
 YouTube video: https://youtu.be/PCWVSgsUzIA?si=J9yzzO7IJ4WFapTH
 
 ## License
